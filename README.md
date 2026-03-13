@@ -64,9 +64,15 @@ systemctl --user enable --now voxtype-tray
 
 ### voxtype-hotkey (system service)
 
-Runs as a system service so it can have `input` group access without your user being in the group.
+Runs as a system service so it can have `input` group access without your user being in the group. The binary must be installed to a root-owned location (not your home directory) since the service runs with elevated group privileges.
 
 Requires voxtype to be configured with `[hotkey] enabled = false` (voxtype-hotkey replaces the built-in evdev listener).
+
+```bash
+# Install to a root-owned path
+cargo build --release -p voxtype-hotkey
+sudo install -Dm755 target/release/voxtype-hotkey /usr/local/bin/voxtype-hotkey
+```
 
 ```ini
 # /etc/systemd/system/voxtype-hotkey.service
@@ -78,9 +84,9 @@ After=graphical.target
 Type=simple
 User=YOUR_USER
 SupplementaryGroups=input
-Environment="PATH=/home/YOUR_USER/.cargo/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
 Environment="XDG_RUNTIME_DIR=/run/user/YOUR_UID"
-ExecStart=/home/YOUR_USER/.cargo/bin/voxtype-hotkey --key CAPSLOCK --tail-ms 300
+ExecStart=/usr/local/bin/voxtype-hotkey --key CAPSLOCK --tail-ms 300
 Restart=on-failure
 RestartSec=5
 
